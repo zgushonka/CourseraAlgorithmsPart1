@@ -5,35 +5,42 @@ import edu.princeton.cs.algs4.StdStats;
 public class PercolationStats {
     private double[] trialsResult;
 
+    private final int trialsValue;
+    private double meanValue = 0;
+    private double stddevValue = 0;
+    private double confValue = 0;
+
     // perform independent trials on an n-by-n grid
     public PercolationStats(int n, int trials) {
         if (n <= 0 || trials <= 0) {
-            throw new IllegalArgumentException("Error: N < 1");
+            throw new IllegalArgumentException();
         }
 
+        trialsValue = trials;
         trialsResult = new double[trials];
         for (int i = 0; i < trials; i++) trialsResult[i] = 0;
         performTrials(n, trials);
+        calcStats();
     }
 
     // sample mean of percolation threshold
     public double mean() {
-        return StdStats.mean(trialsResult);
+        return meanValue;
     }
 
     // sample standard deviation of percolation threshold
     public double stddev() {
-        return StdStats.stddev(trialsResult);
+        return stddevValue;
     }
 
     // low endpoint of 95% confidence interval
     public double confidenceLo() {
-        return mean() - (1.96 * Math.sqrt(stddev()) / (Math.sqrt(trialsResult.length)));
+        return mean() - confValue;
     }
 
     // high endpoint of 95% confidence interval
     public double confidenceHi() {
-        return mean() + (1.96 * Math.sqrt(stddev()) / (Math.sqrt(trialsResult.length)));
+        return mean() + confValue;
     }
 
     private void performTrials(int size, int trials) {
@@ -47,6 +54,12 @@ public class PercolationStats {
             trialsResult[trial] = percolation.numberOfOpenSites() / ((double) (size * size));
             percolation = null;
         }
+    }
+
+    private void calcStats() {
+        meanValue = StdStats.mean(trialsResult);
+        stddevValue = StdStats.stddev(trialsResult);
+        confValue = 1.96 * stddev() / Math.sqrt(trialsValue);
     }
 
     // test client (see below)
